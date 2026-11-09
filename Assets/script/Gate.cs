@@ -1,6 +1,7 @@
 using UnityEngine;
 
 // A solid wall that slides when opened. Needs a (non-trigger) collider.
+// Opens while at least one button pointing at it is pressed.
 [RequireComponent(typeof(Rigidbody2D))]
 public class Gate : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class Gate : MonoBehaviour
 
     Rigidbody2D rb;
     Vector2 closedPos, openPos;
-    bool open;
+    int pressCount;     // how many buttons are currently pressed
 
     void Awake()
     {
@@ -22,10 +23,12 @@ public class Gate : MonoBehaviour
         openPos = closedPos + Vector2.up * openHeight;
     }
 
-    public void SetOpen(bool value) => open = value;
+    public void Press() => pressCount++;
+    public void Release() => pressCount = Mathf.Max(0, pressCount - 1);
 
     void FixedUpdate()
     {
+        bool open = pressCount > 0;
         IsClosing = !open && (rb.position - closedPos).sqrMagnitude > 0.0001f;
 
         Vector2 target = open ? openPos : closedPos;

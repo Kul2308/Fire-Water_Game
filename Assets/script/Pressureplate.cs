@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Button on the floor. Opens a Gate while anything dynamic (player or box) stands on it.
+// Button on the floor. Holds a Gate open while anything dynamic (player or box) stands on it.
 // Collider must be a trigger.
 public class PressurePlate : MonoBehaviour
 {
@@ -14,13 +14,13 @@ public class PressurePlate : MonoBehaviour
     {
         if (!IsActivator(other)) return;
         count++;
-        gate.SetOpen(true);
+        if (count == 1) gate.Press();      // first thing stepped on this button
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
         if (!IsActivator(other)) return;
-        count--;
-        if (count <= 0) { count = 0; gate.SetOpen(false); }
+        count = Mathf.Max(0, count - 1);
+        if (count == 0) gate.Release();    // last thing left this button
     }
 }

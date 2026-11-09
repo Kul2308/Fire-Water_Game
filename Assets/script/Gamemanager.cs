@@ -8,18 +8,25 @@ public class GameManager : MonoBehaviour
 
     [Header("Optional UI")]
     public GameObject winPanel;      // a panel that says "Level complete! Press Space"
-    public TMP_Text gemText;         // shows gem count
+    public TMP_Text gemText;         // live counter in the corner
+    public TMP_Text winGemText;      // gem result shown on the level complete panel
 
     [Header("Level flow")]
     public string nextSceneName = "";   // leave empty to just restart the level
 
-    int gems;
+    int gems, totalGems;
     bool fireAtDoor, waterAtDoor, won;
 
     void Awake()
     {
         Instance = this;
         Time.timeScale = 1f;
+    }
+
+    void Start()
+    {
+        // Count every gem placed in the level (after all objects have woken up).
+        totalGems = FindObjectsByType<Collectible>(FindObjectsSortMode.None).Length;
         UpdateUI();
     }
 
@@ -48,6 +55,13 @@ public class GameManager : MonoBehaviour
     void Win()
     {
         won = true;
+
+        if (winGemText != null)
+        {
+            winGemText.text = "Gems: " + gems + " / " + totalGems;
+            if (totalGems > 0 && gems == totalGems) winGemText.text += "\nAll gems collected!";
+        }
+
         if (winPanel != null) winPanel.SetActive(true);
         Time.timeScale = 0f;
     }
@@ -62,6 +76,6 @@ public class GameManager : MonoBehaviour
 
     void UpdateUI()
     {
-        if (gemText != null) gemText.text = "Gems: " + gems;
+        if (gemText != null) gemText.text = "Gems: " + gems + " / " + totalGems;
     }
 }
