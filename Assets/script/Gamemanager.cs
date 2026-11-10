@@ -7,7 +7,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Optional UI")]
-    public GameObject winPanel;      // a panel that says "Level complete! Press Space"
+    public GameObject winPanel;      // "Level complete!" panel (starts disabled)
+    public GameObject losePanel;     // "You lose! Try again" panel (starts disabled)
     public TMP_Text gemText;         // live counter in the corner
     public TMP_Text winGemText;      // gem result shown on the level complete panel
 
@@ -15,7 +16,7 @@ public class GameManager : MonoBehaviour
     public string nextSceneName = "";   // leave empty to just restart the level
 
     int gems, totalGems;
-    bool fireAtDoor, waterAtDoor, won;
+    bool fireAtDoor, waterAtDoor, won, dead;
 
     void Awake()
     {
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R)) Restart();
         if (won && Input.GetKeyDown(KeyCode.Space)) NextLevel();
+        if (dead && Input.GetKeyDown(KeyCode.Space)) Restart();
     }
 
     public void AddGem()
@@ -47,10 +49,24 @@ public class GameManager : MonoBehaviour
         if (e == Element.Fire) fireAtDoor = inside;
         else waterAtDoor = inside;
 
-        if (fireAtDoor && waterAtDoor && !won) Win();
+        if (fireAtDoor && waterAtDoor && !won && !dead) Win();
     }
 
-    public void PlayerDied() => Restart();
+    public void PlayerDied()
+    {
+        if (dead || won) return;     // only react once
+        dead = true;
+
+        if (losePanel != null)
+        {
+            losePanel.SetActive(true);
+            Time.timeScale = 0f;     // freeze the game behind the panel
+        }
+        else
+        {
+            Restart();               // no panel set up: restart right away like before
+        }
+    }
 
     void Win()
     {
@@ -72,7 +88,8 @@ public class GameManager : MonoBehaviour
         else SceneManager.LoadScene(nextSceneName);
     }
 
-    void Restart() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    // Public so a UI Button ("Try Again") can call it.
+    public void Restart() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
     void UpdateUI()
     {
