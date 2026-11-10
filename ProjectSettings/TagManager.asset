@@ -41,5 +41,20 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: BG
+    uniqueID: 3917710055
+    locked: 0
+  - name: Gate
+    uniqueID: 313966485
+    locked: 0
+  - name: tile
+    uniqueID: 2641375427
+    locked: 0
+  - name: object
+    uniqueID: 2910727685
+    locked: 0
+  - name: player
+    uniqueID: 1427674291
+    locked: 0
   m_RenderingLayers:
   - Default
