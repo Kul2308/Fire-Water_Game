@@ -7,13 +7,19 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Optional UI")]
-    public GameObject winPanel;      // "Level complete!" panel (starts disabled)
-    public GameObject losePanel;     // "You lose! Try again" panel (starts disabled)
-    public TMP_Text gemText;         // live counter in the corner
-    public TMP_Text winGemText;      // gem result shown on the level complete panel
+    public GameObject winPanel;
+    public GameObject losePanel;
+    public TMP_Text gemText;
+    public TMP_Text winGemText;
 
     [Header("Level flow")]
-    public string nextSceneName = "";   // leave empty to just restart the level
+    public string nextSceneName = "";
+
+    [Header("Audio")]                       // NEW
+    public AudioClip gemSound;              // NEW 
+    public AudioClip winSound;              // NEW 
+    public AudioClip loseSound;             // NEW 
+    [Range(0f, 1f)] public float volume = 0.8f;   // NEW
 
     int gems, totalGems;
     bool fireAtDoor, waterAtDoor, won, dead;
@@ -26,7 +32,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Count every gem placed in the level (after all objects have woken up).
         totalGems = FindObjectsByType<Collectible>(FindObjectsSortMode.None).Length;
         UpdateUI();
     }
@@ -38,10 +43,18 @@ public class GameManager : MonoBehaviour
         if (dead && Input.GetKeyDown(KeyCode.Space)) Restart();
     }
 
+    // NEW: Sound
+    void PlaySound(AudioClip clip)
+    {
+        if (clip != null && Camera.main != null)
+            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volume);
+    }
+
     public void AddGem()
     {
         gems++;
         UpdateUI();
+        PlaySound(gemSound);                // NEW
     }
 
     public void SetAtDoor(Element e, bool inside)
@@ -54,23 +67,26 @@ public class GameManager : MonoBehaviour
 
     public void PlayerDied()
     {
-        if (dead || won) return;     // only react once
+        if (dead || won) return;
         dead = true;
+
+        PlaySound(loseSound);               // NEW
 
         if (losePanel != null)
         {
             losePanel.SetActive(true);
-            Time.timeScale = 0f;     // freeze the game behind the panel
+            Time.timeScale = 0f;
         }
         else
         {
-            Restart();               // no panel set up: restart right away like before
+            Restart();
         }
     }
 
     void Win()
     {
         won = true;
+        PlaySound(winSound);                // NEW
 
         if (winGemText != null)
         {
@@ -88,7 +104,6 @@ public class GameManager : MonoBehaviour
         else SceneManager.LoadScene(nextSceneName);
     }
 
-    // Public so a UI Button ("Try Again") can call it.
     public void Restart() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
     void UpdateUI()
